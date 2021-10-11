@@ -13,6 +13,10 @@ app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
 db = SQLAlchemy(app)
 
 # Error Page
+@app.errorhandler(400)
+def bad_request(error):
+    return render_template('400.html'), 400
+
 @app.errorhandler(403)
 def page_forbidden(error):
     return render_template('403.html'), 403
@@ -24,6 +28,10 @@ def page_not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
+
+@app.errorhandler(503)
+def service_unavailable(error):
+    return render_template('503.html'), 503
 
 
 # HOME PAGE VIEW
