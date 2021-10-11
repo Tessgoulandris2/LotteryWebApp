@@ -1,5 +1,8 @@
+import base64
 from datetime import datetime
 from flask_login import UserMixin
+from Crypto.Protocol.KDF import scrypt
+from Crypto.Random import get_random_bytes
 from werkzeug.security import generate_password_hash
 from app import db
 
@@ -8,6 +11,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
+
 
     # User authentication information.
     email = db.Column(db.String(100), nullable=False, unique=True)
@@ -38,7 +42,7 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = generate_password_hash(password)
         self.pin_key = pin_key
-        self.draw_key = None
+        self.draw_key = base64.urlsafe_b64encode(scrypt(password, str(get_random_bytes(32)), 32, N=2 ** 14, r=8, p=1))
         self.role = role
         self.registered_on = datetime.now()
         self.last_logged_in = None
