@@ -3,9 +3,12 @@ from datetime import datetime
 from flask_login import UserMixin
 from Crypto.Protocol.KDF import scrypt
 from Crypto.Random import get_random_bytes
+from cryptography.fernet import Fernet
 from werkzeug.security import generate_password_hash
 from app import db
 
+def encrypt(data, draw_key):
+    return Fernet(draw_key).encrypt(bytes(data, 'utf-8'))
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
