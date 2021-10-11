@@ -1,3 +1,4 @@
+import re
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import Required, Email, Length, EqualTo, ValidationError
@@ -22,3 +23,9 @@ class RegisterForm(FlaskForm):
                                                                                          'match.')])
     pin_key = StringField(validators=[Required()])
     submit = SubmitField()
+
+    def password_authentication(self, password):
+        p = re.compile(r'(?=.*\d)(?=.*[a-zA-Z])(?=.*[0-9][1-9])')
+        if not p.match(self.password.data):
+            raise ValidationError("Password must contain at 1 digit and 1 upper and lowercase letter and 1 special "
+                                  "character.")
