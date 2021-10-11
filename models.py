@@ -63,9 +63,9 @@ class Draw(db.Model):
     win = db.Column(db.BOOLEAN, nullable=False)
     round = db.Column(db.Integer, nullable=False, default=0)
 
-    def __init__(self, user_id, draw, win, round):
-        self.user_id = user_id
-        self.draw = draw
+    def __init__(self, user_id, draw, win, round, draw_key):
+        self.user_id = encrypt(user_id, draw_key)
+        self.draw = encrypt(draw, draw_key)
         self.played = False
         self.match = False
         self.win = win
