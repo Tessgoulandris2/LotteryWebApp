@@ -71,6 +71,12 @@ class Draw(db.Model):
         self.win = win
         self.round = round
 
+    def update_draw(self, user_id, draw, draw_key):
+        self.user_id = encrypt(user_id, draw_key)
+        self.draw = encrypt(draw, draw_key)
+        db.session.commit()
+
+
 
 def init_db():
     db.drop_all()
