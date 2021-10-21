@@ -61,7 +61,7 @@ def login():
         # If no user is found then users will be asked to try again
         if not user or not check_password_hash(user.password, form.password.data):
             flash('Please make sure you login details are correct and try again.')
-            return login()
+            return render_template('login.html', form=form)
 
         # Once a user is logged in they will be taken to the profile page
                     #TODO
