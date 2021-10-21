@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
-
+from datetime import datetime
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 
@@ -61,6 +61,11 @@ def login():
             return render_template('login.html', form=form)
 
             login_user(user)
+
+            user.last_logged_in = user.current_logged_in
+            user.current_logged_in = datetime.now()
+            db.session.add(user)
+            db.session.commit()
 
         return login()
     return render_template('login.html', form=form)
