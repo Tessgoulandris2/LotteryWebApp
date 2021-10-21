@@ -54,7 +54,7 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        return login()
+        return profile()
     return render_template('login.html', form=form)
 
 

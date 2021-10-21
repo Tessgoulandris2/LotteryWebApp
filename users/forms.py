@@ -12,14 +12,14 @@ def special_characters_search(form, field):
 
 
 def password_authentication(self, password):
-    p = re.compile(r'(?=.*\d)(?=.*[a-zA-Z])(?=.*[0-9][1-9])')
+    p = re.compile(r'(?=.*\d)(?=.*[a-zA-Z])(?=.*[SPECIAL CHARACTERS])')
     if not p.match(self.password.data):
         raise ValidationError("Password must contain 1 digit and 1 upper and lowercase letter and 1 special "
                               "character.")
 
 
 def phone_format(self, field):
-    p = re.compile(r'\d{4}-\d{3}\d{4}')
+    p = re.compile(r'\d{4}-\d{3}-\d{4}')
     if not p.match(field.data):
         raise ValidationError(f"Please enter your phone number in the format XXXX-XXX-XXXX.")
 

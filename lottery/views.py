@@ -19,7 +19,7 @@ def lottery():
     return render_template('lottery.html')
 
 
-@lottery_blueprint.route('/add_draw', methods=['POST'])
+@lottery_blueprint.route('/add_draw', methods=['GET', 'POST'])
 def add_draw():
     submitted_draw = ''
     for i in range(6):
@@ -27,7 +27,7 @@ def add_draw():
     submitted_draw.strip()
 
     # create a new draw with the form data.
-    new_draw = Draw(user_id=1, draw=submitted_draw, win=False, round=0)  # TODO: update user_id [user_id=1 is a placeholder]
+    new_draw = Draw(user_id=None, draw=submitted_draw, win=False, round=0, draw_key=draw_key)  # TODO: update user_id [user_id=1 is a placeholder]
 
     # add the new draw to the database
     db.session.add(new_draw)
