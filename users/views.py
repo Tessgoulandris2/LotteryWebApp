@@ -1,9 +1,6 @@
 # IMPORTS
-import logging
-from functools import wraps
-
 from flask import Blueprint, render_template, flash, redirect, url_for, request
-from flask_login import current_user
+from flask_login import login_user
 from werkzeug.security import check_password_hash
 from app import db
 from models import User
@@ -63,9 +60,11 @@ def login():
             flash('Please make sure you login details are correct and try again.')
             return render_template('login.html', form=form)
 
-        # Once a user is logged in they will be taken to the profile page
-                    #TODO
+            login_user(user)
+
+        return login()
     return render_template('login.html', form=form)
+
 
 
 # view user profile
