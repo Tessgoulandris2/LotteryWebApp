@@ -49,6 +49,7 @@ if __name__ == "__main__":
     free_port = free_socket.getsockname()[1]
     free_socket.close()
 
+    # Import Login Manager
     login_manager = LoginManager()
     login_manager.login_view = 'users.login'
     login_manager.init_app(app)
