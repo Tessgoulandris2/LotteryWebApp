@@ -70,7 +70,11 @@ def login():
         return login()
     return render_template('login.html', form=form)
 
-
+# view user logout
+@users_blueprint.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 # view user profile
 @users_blueprint.route('/profile')
