@@ -4,7 +4,7 @@ from functools import wraps
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import current_user
-
+from werkzeug.security import check_password_hash
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
@@ -53,7 +53,16 @@ def register():
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    # Checking the form is valid
     if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        # If this is returned then the user is already stored in the database
+
+        # If no user is found then users will be asked to try again
+        if not user or not check_password_hash(user.password, form.password.data):
+            flash('Please make sure you login details are correct and try again.')
+
+        # Once a user is logged in they will be taken to the profile page
         return profile()
     return render_template('login.html', form=form)
 
