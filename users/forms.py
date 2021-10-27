@@ -1,5 +1,5 @@
 import re
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import Required, Email, Length, EqualTo, ValidationError
 
@@ -12,7 +12,7 @@ def special_characters_search(form, field):
 
 
 def password_authentication(self, password):
-    p = re.compile(r'(?=.*\d)(?=.*[a-zA-Z])(?=.*[SPECIAL CHARACTERS])')
+    p = re.compile(r'(?=.*\d)(?=.*[a-zA-Z])')
     if not p.match(self.password.data):
         raise ValidationError("Password must contain 1 digit and 1 upper and lowercase letter and 1 special "
                               "character.")
@@ -42,4 +42,5 @@ class RegisterForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField(validators=[Required(), Email()])
     password = PasswordField(validators=[Required()])
+    recaptcha = RecaptchaField()
     submit = SubmitField()
