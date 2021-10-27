@@ -35,12 +35,13 @@ class RegisterForm(FlaskForm):
                                          password_authentication])
     confirm_password = PasswordField(validators=[Required(), EqualTo('password', message='Both passwords inputs must '
                                                                                          'match.')])
-    pin_key = StringField(validators=[Required(), Length(32, message='Pin Key must be 32 characters long')])
+    pin_key = StringField(validators=[Required(), Length(max=32, min=32, message='Pin Key must be 32 characters long')])
     submit = SubmitField()
 
 
 class LoginForm(FlaskForm):
     email = StringField(validators=[Required(), Email()])
     password = PasswordField(validators=[Required()])
+    pin = StringField(validators=[Required()])
     recaptcha = RecaptchaField()
     submit = SubmitField()
