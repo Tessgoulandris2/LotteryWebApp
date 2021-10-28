@@ -6,6 +6,8 @@ from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
 from datetime import datetime
+import pyotp
+
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 
@@ -52,13 +54,17 @@ def login():
     form = LoginForm()
     # Checking the form is valid
     if form.validate_on_submit():
+
         user = User.query.filter_by(email=form.email.data).first()
         # If this is returned then the user is already stored in the database
 
         # If no user is found then users will be asked to try again
         if not user or not check_password_hash(user.password, form.password.data):
             flash('Please make sure you login details are correct and try again.')
+
             return render_template('login.html', form=form)
+
+        if pyotp.TOTP(user.pin_key).verify(form.pin.data):
 
             login_user(user)
 
@@ -70,11 +76,13 @@ def login():
         return login()
     return render_template('login.html', form=form)
 
+
 # view user logout
 @users_blueprint.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
 
 # view user profile
 @users_blueprint.route('/profile')
