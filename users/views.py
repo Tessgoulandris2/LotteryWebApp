@@ -64,6 +64,9 @@ def login():
     # Checking the form is valid
     if form.validate_on_submit():
 
+        # Login try's are added by one
+        session['logins'] += 1
+
         user = User.query.filter_by(email=form.email.data).first()
         # If this is returned then the user is already stored in the database
 
@@ -75,6 +78,9 @@ def login():
 
         # Checking if the users pin key and time based pin match
         if pyotp.TOTP(user.pin_key).verify(form.pin.data):
+
+            # if the user is logged in then the number of attempts is reset
+            session['logins'] = 0
 
             login_user(user)
 
