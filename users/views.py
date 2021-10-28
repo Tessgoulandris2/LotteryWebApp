@@ -1,5 +1,5 @@
 # IMPORTS
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, flash, redirect, url_for, session
 from flask_login import login_user, logout_user
 from werkzeug.security import check_password_hash
 from app import db
@@ -51,6 +51,15 @@ def register():
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+
+    # If statement to create attribute logins if not already created
+    if session.get('logins'):
+        session['logins'] = 0
+
+    # Password attempt capped at 3 times and error message presented
+    elif session.get('logins') >= 3:
+        flash('Limit of password attempts ')
+
     form = LoginForm()
     # Checking the form is valid
     if form.validate_on_submit():
@@ -64,6 +73,7 @@ def login():
 
             return render_template('login.html', form=form)
 
+        # Checking if the users pin key and time based pin match
         if pyotp.TOTP(user.pin_key).verify(form.pin.data):
 
             login_user(user)
@@ -72,6 +82,9 @@ def login():
             user.current_logged_in = datetime.now()
             db.session.add(user)
             db.session.commit()
+
+        else:
+            flash("Your 2FA is wrong!")
 
         return login()
     return render_template('login.html', form=form)
