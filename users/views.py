@@ -74,6 +74,14 @@ def login():
         if not user or not check_password_hash(user.password, form.password.data):
             flash('Please make sure you login details are correct and try again.')
 
+        # Telling the user how many attempts they have left
+            if session['logins'] == 3:
+                flash('Limit of password attempts')
+            elif session['logins'] == 2:
+                flash('Login details incorrect, try again. You have one attempts left.')
+            elif session['logins'] == 1:
+                flash('Login details incorrect, try again. You have two attempts left.')
+
             return render_template('login.html', form=form)
 
         # Checking if the users pin key and time based pin match
