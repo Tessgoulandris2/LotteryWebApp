@@ -1,24 +1,40 @@
 # IMPORTS
+import copy
 import logging
 
 from flask import Blueprint, render_template, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
+from sqlalchemy import desc
 
 from app import db
-from models import Draw, User
+from models import Draw, decrypt
 
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 
-user = User.query.first()
-draw_key = user.draw_key
 
+# user = User.query.first()
+# draw_key = user.draw_key
 
 # VIEWS
 # view lottery page
 @lottery_blueprint.route('/lottery')
 @login_required
 def lottery():
+    # draws = Draw.query.order_by(desc('id')).all()
+    #
+    # # creates a list of copied post objects which are independent of database.
+    # draw_copies = list(map(lambda x: copy.deepcopy(x), draws))
+    #
+    # # empty list for decrypted copied post objects
+    # decrypted_draws = []
+    #
+    # # decrypt each copied post object and add it to decrypted_posts array.
+    # for d in draw_copies:
+    #     user = User.query.filter_by(email=d.email).first()
+    #     d.view_draw(user.draw_key)
+    #     decrypted_draws.append(d)
+
     return render_template('lottery.html')
 
 
@@ -31,8 +47,8 @@ def add_draw():
     submitted_draw.strip()
 
     # create a new draw with the form data.
-    new_draw = Draw(user_id=None, draw=submitted_draw, win=False, round=0,
-                    draw_key=draw_key)  # TODO: update user_id [user_id=1 is a placeholder]
+    new_draw = Draw(user_id=current_user.get_id(), draw=submitted_draw, win=False, round=0,
+                    draw_key=current_user.draw_key)
 
     # add the new draw to the database
     db.session.add(new_draw)
@@ -48,12 +64,16 @@ def add_draw():
 @login_required
 def view_draws():
     # get all draws that have not been played [played=0]
-    playable_draws = Draw.query.filter_by(played=False).all()  # TODO: filter playable draws for current user
+    playable_draws = Draw.query.filter_by(played=False, user_id=current_user.get_id()).all()
+    decrypted_draws =[]
+    for draws in playable_draws:
+        draws.draw = decrypt(draws.draw, current_user.draw_key)
+        decrypted_draws.append(draws)
 
     # if playable draws exist
     if len(playable_draws) != 0:
         # re-render lottery page with playable draws
-        return render_template('lottery.html', playable_draws=playable_draws)
+        return render_template('lottery.html', playable_draws=decrypted_draws)
     else:
         flash('No playable draws.')
         return lottery()

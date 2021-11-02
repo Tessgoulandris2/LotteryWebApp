@@ -7,14 +7,19 @@ from cryptography.fernet import Fernet
 from werkzeug.security import generate_password_hash
 from app import db
 
+
 def encrypt(data, draw_key):
     return Fernet(draw_key).encrypt(bytes(data, 'utf-8'))
+
+
+def decrypt(data, draw_key):
+    return Fernet(draw_key).decrypt(bytes(data)).decode('utf-8')
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-
 
     # User authentication information.
     email = db.Column(db.String(100), nullable=False, unique=True)
@@ -64,7 +69,7 @@ class Draw(db.Model):
     round = db.Column(db.Integer, nullable=False, default=0)
 
     def __init__(self, user_id, draw, win, round, draw_key):
-        self.user_id = encrypt(user_id, draw_key)
+        self.user_id = user_id
         self.draw = encrypt(draw, draw_key)
         self.played = False
         self.match = False
@@ -75,7 +80,6 @@ class Draw(db.Model):
         self.user_id = encrypt(user_id, draw_key)
         self.draw = encrypt(draw, draw_key)
         db.session.commit()
-
 
 
 def init_db():
@@ -91,5 +95,3 @@ def init_db():
 
     db.session.add(admin)
     db.session.commit()
-
-
