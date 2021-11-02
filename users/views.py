@@ -1,6 +1,6 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from app import db
 from models import User
@@ -53,7 +53,7 @@ def register():
 def login():
 
     # If statement to create attribute logins if not already created
-    if session.get('logins'):
+    if not session.get('logins'):
         session['logins'] = 0
 
     # Password attempt capped at 3 times and error message presented
@@ -96,16 +96,17 @@ def login():
             user.current_logged_in = datetime.now()
             db.session.add(user)
             db.session.commit()
+            return redirect(url_for('users.profile'))
 
         else:
             flash("Your 2FA is wrong!")
 
-        return login()
     return render_template('login.html', form=form)
 
 
 # view user logout
 @users_blueprint.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
