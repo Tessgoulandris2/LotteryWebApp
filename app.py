@@ -1,8 +1,9 @@
 # IMPORTS
 import socket
 import logging
-from flask import Flask, render_template
-from flask_login import LoginManager
+from flask import Flask, render_template, request
+from functools import wraps
+from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -29,6 +30,27 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
 app.config['RECAPTCHA_PUBLIC_KEY'] = "6LcljvkcAAAAAA31q-CFb4ROC95ocRh1N7vS0jZo"
 app.config['RECAPTCHA_PRIVATE_KEY'] = "6LcljvkcAAAAAJhjsC-7PXhLQN3lvyZw1giDqYdb"
+
+
+# FUNCTIONS
+def requires_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if current_user.role not in roles:
+                logging.warning('SECURITY - Unauthorised access attempt [%s, %s, %s, %s]',
+                                current_user.id,
+                                current_user.username,
+                                current_user.role,
+                                request.remote_addr)
+                # Redirect the user to an unauthorised notice!
+                return render_template('403.html')
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return wrapper
+
 
 # initialise database
 db = SQLAlchemy(app)
@@ -98,4 +120,4 @@ if __name__ == "__main__":
     app.register_blueprint(admin_blueprint)
     app.register_blueprint(lottery_blueprint)
 
-    app.run(host=my_host, port=free_port, debug=True)
+    app.run(host=my_host, port=free_port, debug=True, ssl_context=('cert.pem', 'key.pem'))
