@@ -1,11 +1,39 @@
-{% extends "base.html" %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Numbers</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css"/>
+    <script type="text/javascript" src="{{ url_for('static', filename='secure_rng.js') }}"></script>
+</head>
+<body>
+<section class="hero is-primary is-fullheight">
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <h1 class="title is-1">Random Number Generator</h1>
 
-{% block content %}
-<h1 class="title">Lottery Web Application
-</h1>
-<h2 class="subtitle">
-  CSC2031 Security & Programming Paradigms
-</h2>
-
-<p>{{ current_user.firstname}} {{ current_user.lastname }}</p>
-{% endblock %}
+            <div class="column is-10 is-offset-1">
+                <div class="column is-8 is-offset-2">
+                    <div class="box">
+                        <form method="POST" action="">
+                            <div class="columns is-multiline is-centered">
+                                <div class="column is-one-half">
+                                    <input class="input" type="number" name="no1" id="no1" placeholder="value 1" min="1" max="1000" required>
+                                </div>
+                                <div class="column is-one-half">
+                                    <input class="input" type="number" name="no2" id="no2" placeholder="value 2" min="1" max="1000" required>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <button type="button" class="button is-info is-centered" onclick="getValues()">
+                                    Get Values
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
