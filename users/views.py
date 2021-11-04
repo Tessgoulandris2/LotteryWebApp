@@ -1,9 +1,10 @@
 # IMPORTS
-from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flask_login import login_user, logout_user, login_required
+import logging
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 from app import db
-from models import User
+from models import User, UserMixin
 from users.forms import RegisterForm, LoginForm
 from datetime import datetime
 import pyotp
@@ -41,6 +42,8 @@ def register():
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
+
+        logging.warning('SECURITY - User registration [%s, %s]', form.email.data, request.remote_addr)
 
         # sends user to login page
         return redirect(url_for('users.login'))
@@ -96,7 +99,14 @@ def login():
             user.current_logged_in = datetime.now()
             db.session.add(user)
             db.session.commit()
-            return redirect(url_for('users.profile'))
+
+            logging.warning('SECURITY - Log in [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
+
+            # Directing different roles to the appropriate page
+            if current_user.role == 'admin':
+                return redirect(url_for('admin.admin'))
+            else:
+                return redirect(url_for('users.profile'))
 
         else:
             flash("Your 2FA is wrong!")
@@ -108,6 +118,7 @@ def login():
 @users_blueprint.route('/logout')
 @login_required
 def logout():
+    logging.warning('SECURITY - Log out [%s, %s, %s]', current_user.get_id(), current_user.email, request.remote_addr)
     logout_user()
     return redirect(url_for('index'))
 
@@ -115,15 +126,15 @@ def logout():
 # view user profile
 @users_blueprint.route('/profile')
 def profile():
-    return render_template('profile.html', name="PLACEHOLDER FOR FIRSTNAME")
+    return render_template('profile.html', name=current_user.firstname)
 
 
 # view user account
 @users_blueprint.route('/account')
 def account():
     return render_template('account.html',
-                           acc_no="PLACEHOLDER FOR USER ID",
-                           email="PLACEHOLDER FOR USER EMAIL",
-                           firstname="PLACEHOLDER FOR USER FIRSTNAME",
-                           lastname="PLACEHOLDER FOR USER LASTNAME",
-                           phone="PLACEHOLDER FOR USER PHONE")
+                           acc_no=current_user.id,
+                           email=current_user.email,
+                           firstname=current_user.firstname,
+                           lastname=current_user.lastname,
+                           phone=current_user.phone)
