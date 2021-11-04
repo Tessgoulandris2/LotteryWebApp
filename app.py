@@ -1,8 +1,26 @@
 # IMPORTS
 import socket
+import logging
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+
+
+# Logging
+class SecurityFilter(logging.Filter):
+    def filter(self, record):
+        return "SECURITY" in record.getMessage()
+
+
+fh = logging.FileHandler('lottery.log', 'w')
+fh.setLevel(logging.WARNING)
+fh.addFilter(SecurityFilter())
+formatter = logging.Formatter('%(asctime)s : %(message)s', '%m/%d/%Y %I:%M:%S %p')
+fh.setFormatter(formatter)
+
+logger = logging.getLogger('')
+logger.propagate = False
+logger.addHandler(fh)
 
 # CONFIG
 app = Flask(__name__)
@@ -62,6 +80,7 @@ if __name__ == "__main__":
     login_manager.init_app(app)
 
     from models import User
+
 
     @login_manager.user_loader
     def load_user(id):
