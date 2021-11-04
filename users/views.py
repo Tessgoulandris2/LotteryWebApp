@@ -54,11 +54,9 @@ def register():
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-
     # If statement to create attribute logins if not already created
     if not session.get('logins'):
         session['logins'] = 0
-
     # Password attempt capped at 3 times and error message presented
     elif session.get('logins') >= 3:
         flash('Limit of password attempts ')
@@ -66,18 +64,21 @@ def login():
     form = LoginForm()
     # Checking the form is valid
     if form.validate_on_submit():
+        if 'last_user' in session and form.email.data != session['last_user']:
+            session['logins'] = 0
 
         # Login try's are added by one
         session['logins'] += 1
+        session['last_user'] = form.email.data
 
         user = User.query.filter_by(email=form.email.data).first()
         # If this is returned then the user is already stored in the database
 
         # If no user is found then users will be asked to try again
+        print(session)
         if not user or not check_password_hash(user.password, form.password.data):
-            flash('Please make sure you login details are correct and try again.')
 
-        # Telling the user how many attempts they have left
+            # Telling the user how many attempts they have left
             if session['logins'] == 3:
                 flash('Limit of password attempts')
             elif session['logins'] == 2:
@@ -92,7 +93,6 @@ def login():
 
             # if the user is logged in then the number of attempts is reset
             session['logins'] = 0
-
             login_user(user)
 
             user.last_logged_in = user.current_logged_in
