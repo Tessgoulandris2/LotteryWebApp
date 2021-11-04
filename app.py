@@ -5,6 +5,7 @@ from flask import Flask, render_template, request
 from functools import wraps
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
 
 
 # Logging
@@ -55,6 +56,16 @@ def requires_roles(*roles):
 # initialise database
 db = SQLAlchemy(app)
 
+# Security Headers
+csp = {
+    'default-src': [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+}
+talisman = Talisman(app, content_security_policy=csp)
+
+
 
 # Error Page
 @app.errorhandler(400)
@@ -85,6 +96,7 @@ def service_unavailable(error):
 # HOME PAGE VIEW
 @app.route('/')
 def index():
+    print(request.headers)
     return render_template('index.html')
 
 
