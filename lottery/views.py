@@ -33,6 +33,7 @@ def add_draw():
     submitted_draw.strip()
 
     # create a new draw with the form data.
+    print(f"add_draw() {current_user.draw_key =}")
     new_draw = Draw(user_id=current_user.get_id(), draw=submitted_draw, win=False, round=0,
                     draw_key=current_user.draw_key)
 
@@ -54,6 +55,7 @@ def view_draws():
     playable_draws = Draw.query.filter_by(played=False, user_id=current_user.get_id()).all()
     decrypted_draws = []
     for draws in playable_draws:
+        print(f"view_draws() {current_user.draw_key =}")
         draws.draw = decrypt(draws.draw, current_user.draw_key)
         decrypted_draws.append(draws)
 
@@ -73,13 +75,14 @@ def view_draws():
 def check_draws():
     # get played draws
     played_draws = Draw.query.filter_by(played=True).all()
+    print(f"All Played Draws: {list(played_draws)}")
     users = User.query.all()
 
     decrypted_draws = []
     for draws in played_draws:
-        users = [u for u in users if u["id"] == draws["user_id"]][0]
+        user = [u for u in users if u.id == draws.user_id][0]
         print(f"check_draws() {user =}")
-        draws.draw = decrypt(draws.draw, users["draw_key"])
+        draws.draw = decrypt(draws.draw, user.draw_key)
         decrypted_draws.append(draws)
 
     # if played draws exist
@@ -97,9 +100,9 @@ def check_draws():
 @login_required
 @requires_roles('user')
 def play_again():
-    delete_played = Draw.__table__.delete().where(Draw.played)  # TODO: delete played draws for current user only
+    print("Deleting all draws...")
+    delete_played = Draw.__table__.delete().where(Draw.played).where(Draw.user_id == current_user.id)
     db.session.execute(delete_played)
     db.session.commit()
-
     flash("All played draws deleted.")
     return lottery()
